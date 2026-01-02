@@ -4,6 +4,8 @@ set -e
 # Configuración
 APP_NAME="hyperdrive"
 INSTALL_DIR="/opt/$APP_NAME"
+SERVICE_FILE="/etc/systemd/system/$APP_NAME.service"
+USER="root"
 
 # Colores
 GREEN='\033[0;32m'
@@ -59,6 +61,28 @@ cp "$SCRIPT_DIR/uninstall.sh" "$INSTALL_DIR/"
 # 3. Actualizar dependencias
 echo "Verificando dependencias..."
 "$INSTALL_DIR/.venv/bin/pip" install -r "$INSTALL_DIR/requirements.txt"
+
+# 3.5 Actualizar definición del servicio (por si cambiamos a Gunicorn, etc.)
+echo "Actualizando configuración del servicio..."
+cat > "$SERVICE_FILE" <<EOF
+[Unit]
+Description=HyperDrive Disk Manager
+After=network.target
+
+[Service]
+Type=simple
+User=$USER
+WorkingDirectory=$INSTALL_DIR
+ExecStart=$INSTALL_DIR/.venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8090 --access-logfile - --error-logfile - app:app
+Restart=always
+RestartSec=5
+Environment=FLASK_APP=app.py
+Environment=FLASK_ENV=production
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload
 
 # 4. Reiniciar servicio
 echo "Reiniciando servicio..."

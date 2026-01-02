@@ -61,7 +61,7 @@ After=network.target
 Type=simple
 User=$USER
 WorkingDirectory=$INSTALL_DIR
-ExecStart=$INSTALL_DIR/.venv/bin/flask --app app run --host 0.0.0.0 --port 8090 --no-debugger --no-reload
+ExecStart=$INSTALL_DIR/.venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8090 --access-logfile - --error-logfile - app:app
 Restart=always
 RestartSec=5
 Environment=FLASK_APP=app.py
