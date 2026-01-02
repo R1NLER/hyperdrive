@@ -22,6 +22,7 @@ HyperDrive está diseñado para funcionar como un servicio del sistema en Ubuntu
     ```bash
     git clone https://github.com/r1nler/hyperdrive.git
     cd hyperdrive
+    sudo chmod +x ./scripts/*
     ```
 
 2.  **Ejecuta el instalador:**
