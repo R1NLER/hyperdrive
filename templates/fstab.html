@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% set header = "Configuración fstab" %}
+{% set subheader = "Vista amigable y validación de entradas" %}
+
+{% block content %}
+{% set ok_n = (rows | selectattr('status', 'equalto', 'OK') | list | length) %}
+{% set warn_n = (rows | rejectattr('status', 'equalto', 'OK') | list | length) %}
+
+<div class="page-head">
+  <div class="text-muted">Se muestran solo entradas bajo <code>/mnt</code> y <code>/media</code>.</div>
+  <div class="chips">
+    <div class="chip"><span class="chip-k"><i class="bi bi-check-circle me-1"></i>OK</span><span class="chip-v">{{ ok_n }}</span></div>
+    <div class="chip chip-warn"><span class="chip-k"><i class="bi bi-exclamation-triangle me-1"></i>Revisar</span><span class="chip-v">{{ warn_n }}</span></div>
+  </div>
+</div>
+
+<section class="surface">
+  <div class="surface-head">
+    <div>
+      <div class="surface-title"><i class="bi bi-file-earmark-code me-2 text-primary"></i>Vista amigable</div>
+      <div class="surface-subtitle">Detecta entradas problemáticas sin editar a mano.</div>
+    </div>
+  </div>
+
+    <!-- Desktop/tablet: tabla -->
+    <div class="d-none d-md-block table-responsive">
+      <table class="table table-hover align-middle">
+        <thead><tr><th>Especificación</th><th>Mount</th><th>FS</th><th>Opciones</th><th>Estado</th></tr></thead>
+        <tbody>
+          {% for r in rows %}
+          <tr class="{{ 'table-warning' if r.status != 'OK' else '' }}">
+            <td><code>{{ r.spec }}</code></td>
+            <td><code>{{ r.mountpoint }}</code></td>
+            <td><span class="badge bg-dark text-light border border-secondary">{{ r.fstype }}</span></td>
+            <td class="small text-secondary">{{ r.options }}</td>
+            <td>
+              {% if r.status == 'OK' %}
+                <span class="badge text-bg-success rounded-pill"><i class="bi bi-check-circle me-1"></i>OK</span>
+              {% else %}
+                <span class="badge text-bg-warning rounded-pill"><i class="bi bi-exclamation-triangle me-1"></i>Revisar</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile: cards -->
+    <div class="d-md-none">
+      <div class="d-grid gap-3">
+        {% for r in rows %}
+        <div class="card card-soft {{ 'border-warning' if r.status != 'OK' else '' }}">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+              <div class="min-w-0">
+                <div class="small text-muted">Especificación</div>
+                <div class="text-truncate"><code>{{ r.spec }}</code></div>
+              </div>
+              <div>
+                {% if r.status == 'OK' %}
+                  <span class="badge text-bg-success rounded-pill"><i class="bi bi-check-circle me-1"></i>OK</span>
+                {% else %}
+                  <span class="badge text-bg-warning rounded-pill"><i class="bi bi-exclamation-triangle me-1"></i>Revisar</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="row g-2 mt-2">
+              <div class="col-12">
+                <div class="small text-muted">Mount</div>
+                <div class="text-truncate"><code>{{ r.mountpoint }}</code></div>
+              </div>
+              <div class="col-6">
+                <div class="small text-muted">FS</div>
+                <div><span class="badge bg-dark text-light border border-secondary">{{ r.fstype }}</span></div>
+              </div>
+              <div class="col-12">
+                <div class="small text-muted">Opciones</div>
+                <div class="small text-secondary" style="word-break: break-word;">{{ r.options }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endblock %}
